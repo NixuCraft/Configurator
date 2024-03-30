@@ -1,12 +1,22 @@
 # Configurator
-A mid tier config lib for Minecraft plugins.
+A mid-tier barebones config lib for Minecraft plugins.
+
+# What is it useful for
+It's good if you want to do have a config in the format `MyConfig.getSection().getProperty()`
+
+It's also nice if you want some utils to parse strings into Locations/XYZs/Areas, the last two of which this plugin contains (at least for now).
+
+### Note
+As of now you need to shadow this into a plugin's jar, might have it as a plugin itself so it can load separately in the future.
 
 # Usage
-- Make multiple classes that extend ConfigPart for config section you need.
-  
-  Those classes need to call super with a ConfigSourceType and a string. If the ConfigSourceType is MAIN_CONFIG, it'll get the rootConfig from the main config.yml, in which case the second argument will be the key inside of config.yml in which that part of your config is located. Otherwise, if it's OTHER_FILE, it's going to use the root of the file with the name given in the second arguments.
+Make multiple classes that extend ConfigPart for config section you need.
 
-  Here's an example class:
+Those classes need to call super with a ConfigSourceType and a string. 
+- If the ConfigSourceType is MAIN_CONFIG, it'll get the rootConfig from the main config.yml, in which case the second argument will be the key inside of config.yml in which that part of your config is located. 
+- Otherwise, if it's OTHER_FILE, it's going to use the root of the file with the name given in the second arguments.
+
+Here's an example class:
 ```java
 public class GeneralConfig extends ConfigPart {
     @Getter
@@ -18,7 +28,8 @@ public class GeneralConfig extends ConfigPart {
     }
 }
 ```
-- Next, make a class that extends Configurator as follows (basically init all your ConfigParts in initConfigParts and put getters for them)
+
+Next, make a class that extends Configurator as follows (basically init all your ConfigParts in initConfigParts and put getters for them)
 ```java
 public class MyPluginConfig extends Configurator {
     @Getter
@@ -30,12 +41,14 @@ public class MyPluginConfig extends Configurator {
     }
 }
 ```
-- Inside of your onEnable, add the following:
+
+Inside of your onEnable, add the following:
 ```java
     public void onEnable() {
         new MyPluginConfig().init(this);
     }
 ```
+
 And you're done !
 
 Now you can use your config as follows:
