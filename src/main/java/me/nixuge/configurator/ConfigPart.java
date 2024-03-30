@@ -19,46 +19,62 @@ import me.nixuge.configurator.error.ConfigParseException;
 public abstract class ConfigPart extends ConfigStringParsing {
     protected ConfigurationSection rootConfig;
 
-    public enum ConfigSourceType {
-        MAIN_CONFIG,
-        OTHER_FILE
+    public enum FileSearchLocations {
+        PLUGIN_RESOURCES,
+        DATA_FOLDER,
+        BOTH
     }
+    // /**
+    //  * @param sourceType the source type, either a key inside the main config or a separate file.
+    //  * @param source If MAIN_CONFIG the subkey, if OTHER_FILE the file name.
+    //  * @param saveToUserFolderIfNotPresent Only affects OTHER_FILE sourceType, if a file isn't found in the user folder but is found in the ressources, this determines it if should be saved to the user folder or not. Eg you'd set it to "true" for another config, but "false" for some localization data which should never get changed.
+    //  */
     /**
-     * @param sourceType the source type, either a key inside the main config or a separate file.
-     * @param source If MAIN_CONFIG the subkey, if OTHER_FILE the file name.
+     * @param subKey The subkey inside of the main config in which the config is located.
      */
-    public ConfigPart(ConfigSourceType sourceType, String source) {
-        switch (sourceType) {
-            case MAIN_CONFIG:
-                rootConfig = Configurator.getFileConfigBlock(source);
-                break;
-            case OTHER_FILE:
-                rootConfig = loadConfigFromOtherFile(source);
-                break;
-        }
+    public ConfigPart(String subKey) {
+        rootConfig = Configurator.getFileConfigBlock(subKey);
     }
-    private ConfigurationSection loadConfigFromOtherFile(String fileName) {
+
+    /**
+     * @param sourceFile The name of the file which contains the config you want.
+     * @param sourceLocation The location in which the file is located (data folder, plugin resources or both).
+     * @param saveToUserFolderIfNotPresent If enabled, if sourceLocation is pluginresources/both and if it gets to the pluginresources path (=passed the datafolder part if both), it'll attempt to save the pluginresources file to the datafolder once it's at the pluginresources loading part.
+     */
+    public ConfigPart(String sourceFile, FileSearchLocations sourceLocation, boolean saveToUserFolderIfNotPresent) {
+        rootConfig = loadConfigFromOtherFile(sourceFile, sourceLocation, saveToUserFolderIfNotPresent);
+    }
+    private ConfigurationSection loadConfigFromOtherFile(String fileName, FileSearchLocations sourceLocation, boolean saveToUserFolderIfNotPresent) {
         JavaPlugin plugin = Configurator.getPlugin();
-        // First check if file exists for user
-        File userFile = new File(plugin.getDataFolder(), fileName);
-        if (userFile.exists()) {
-            InputStream stream;
-            try {
-                stream = new FileInputStream(userFile);
-                if (stream != null) {
-                    Reader reader = new BufferedReader(new InputStreamReader(stream));
-                    return YamlConfiguration.loadConfiguration(reader).getConfigurationSection("");
-                }
-            } catch (FileNotFoundException e) {}
+
+        // First check if file exists for user (if enabled)
+        if (sourceLocation == FileSearchLocations.DATA_FOLDER || sourceLocation == FileSearchLocations.BOTH) {
+            File userFile = new File(plugin.getDataFolder(), fileName);
+            if (userFile.exists()) {
+                InputStream stream;
+                try {
+                    stream = new FileInputStream(userFile);
+                    if (stream != null) {
+                        Reader reader = new BufferedReader(new InputStreamReader(stream));
+                        return YamlConfiguration.loadConfiguration(reader).getConfigurationSection("");
+                    }
+                } catch (FileNotFoundException e) {}
+            }
         }
+
         // Otherwise check if it exists in the plugin dir
-        InputStream stream = Configurator.getPlugin().getResource(fileName);
-        if (stream != null) {
-            Reader reader = new BufferedReader(new InputStreamReader(stream));
-            return YamlConfiguration.loadConfiguration(reader).getConfigurationSection("");
+        if (sourceLocation == FileSearchLocations.PLUGIN_RESOURCES || sourceLocation == FileSearchLocations.BOTH) {
+            InputStream stream = Configurator.getPlugin().getResource(fileName);
+            if (stream != null) {
+                if (saveToUserFolderIfNotPresent)
+                    Configurator.getPlugin().saveResource(fileName, false);
+                Reader reader = new BufferedReader(new InputStreamReader(stream));
+                return YamlConfiguration.loadConfiguration(reader).getConfigurationSection("");
+            }
         }
-        // Otherwise error out
-        throw new ConfigLoadException("Couldn't find config file " + fileName + ", neither in the user folder nor in the plugins resources.");
+
+        // Otherwise error out if nothing found.
+        throw new ConfigLoadException(String.format("Couldn't find config file %s. Search range: %s.", fileName, sourceLocation));
     }
 
     protected int getInt(ConfigurationSection conf, String key, int defaultVal) {
