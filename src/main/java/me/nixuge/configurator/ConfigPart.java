@@ -47,7 +47,7 @@ public abstract class ConfigPart extends ConfigStringParsing {
                 stream = new FileInputStream(userFile);
                 if (stream != null) {
                     Reader reader = new BufferedReader(new InputStreamReader(stream));
-                    return YamlConfiguration.loadConfiguration(reader).getDefaultSection();
+                    return YamlConfiguration.loadConfiguration(reader).getConfigurationSection("");
                 }
             } catch (FileNotFoundException e) {}
         }
@@ -55,7 +55,7 @@ public abstract class ConfigPart extends ConfigStringParsing {
         InputStream stream = Configurator.getPlugin().getResource(fileName);
         if (stream != null) {
             Reader reader = new BufferedReader(new InputStreamReader(stream));
-            return YamlConfiguration.loadConfiguration(reader).getDefaultSection();
+            return YamlConfiguration.loadConfiguration(reader).getConfigurationSection("");
         }
         // Otherwise error out
         throw new ConfigLoadException("Couldn't find config file " + fileName + ", neither in the user folder nor in the plugins resources.");
