@@ -12,18 +12,27 @@ As of now you need to shadow this into a plugin's jar, might have it as a plugin
 # Usage
 Make multiple classes that extend ConfigPart for config section you need.
 
-Those classes need to call super with a ConfigSourceType and a string. 
-- If the ConfigSourceType is MAIN_CONFIG, it'll get the rootConfig from the main config.yml, in which case the second argument will be the key inside of config.yml in which that part of your config is located. 
-- Otherwise, if it's OTHER_FILE, it's going to use the root of the file with the name given in the second arguments.
-
+Those classes need to call super in one of two ways:
+- If only a string, it'll use that as a key in the main config for the rootConfig.
+- If a string, a FileSearchLocations and a bool, it'll use the string as a filename and use that file as the rootConfig. For the other arguments, refeer to the javadocs
 Here's an example class:
 ```java
-public class GeneralConfig extends ConfigPart {
+public class GeneralConfigMainConfig extends ConfigPart {
     @Getter
     private final String language;
     
     public GeneralConfig() {
-        super(ConfigSourceType.MAIN_CONFIG, "general"); // rootConfig will be in config.yml under the key "general" 
+        super("general"); // rootConfig will be in config.yml under the key "general" 
+        language = getString(rootConfig, "language", "en"); // 3rd parameter is default value. Refeer to the ConfigPart.java file.
+    }
+}
+
+public class GeneralConfigExternalConfig extends ConfigPart {
+    @Getter
+    private final String language;
+    
+    public GeneralConfig() {
+        super("general.yml", FileSearchLocations.BOTH, true); // rootConfig will be in general.yml. It'll search for that file in both the plugin and the data folder, and if it doesn't find it in the data folder, it'll create it with the default values inside of the plugin resources.
         language = getString(rootConfig, "language", "en"); // 3rd parameter is default value. Refeer to the ConfigPart.java file.
     }
 }
