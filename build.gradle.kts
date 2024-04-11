@@ -31,4 +31,10 @@ dependencies {
 
 tasks.build {
     dependsOn("shadowJar")
+    doLast {
+        val exportPath: String by project
+        val buildJar = File("${projectDir}/build/libs", "${rootProject.name}-${rootProject.version}-all.jar")
+
+        buildJar.copyTo(File(exportPath, buildJar.name))
+    }
 }
