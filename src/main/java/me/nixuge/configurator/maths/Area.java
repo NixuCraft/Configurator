@@ -1,6 +1,8 @@
 package me.nixuge.configurator.maths;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 
 public class Area {
     private final XYZ corner1;
@@ -24,5 +26,26 @@ public class Area {
             x >= corner1.getX() && x <= corner2.getX() && 
             y >= corner1.getY() && y <= corner2.getY() && 
             z >= corner1.getZ() && z <= corner2.getZ();
+    }
+
+    public void fill(World world, Material material) {
+        this.forEachBlock(world, loc -> {
+            loc.getBlock().setType(material);
+        });
+    }
+
+    public void forEachBlock(World world, BlockAction action) {
+        for (int x = corner1.getX(); x <= corner2.getX(); x++) {
+            for (int y = corner1.getY(); y <= corner2.getY(); y++) {
+                for (int z = corner1.getZ(); z <= corner2.getZ(); z++) {
+                    action.execute(new Location(world, x, y, z));
+                }
+            }
+        }
+    }
+
+    @FunctionalInterface
+    public interface BlockAction {
+        void execute(Location loc);
     }
 }
