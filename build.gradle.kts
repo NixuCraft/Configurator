@@ -35,6 +35,6 @@ tasks.build {
         val exportPath: String by project
         val buildJar = File("${projectDir}/build/libs", "${rootProject.name}-${rootProject.version}-all.jar")
 
-        buildJar.copyTo(File(exportPath, buildJar.name))
+        buildJar.copyTo(File(exportPath, buildJar.name), true)
     }
 }
