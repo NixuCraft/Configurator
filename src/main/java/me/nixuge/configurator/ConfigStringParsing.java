@@ -4,8 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 import me.nixuge.configurator.error.ConfigParseException;
-import me.nixuge.configurator.maths.Area;
-import me.nixuge.configurator.maths.XYZ;
+import me.nixuge.nixutils.maths.Area;
+import me.nixuge.nixutils.maths.XYZ;
 
 public class ConfigStringParsing {
     public static Location getLocationFromString(String str, World world) {

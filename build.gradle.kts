@@ -27,6 +27,10 @@ dependencies {
     // Lombok (QOL)
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
+
+    // Custom libs
+    val libsPath: String by project
+    implementation(files("${libsPath}/NixUtils-1.0.0-all.jar"))
 }
 
 tasks.build {
