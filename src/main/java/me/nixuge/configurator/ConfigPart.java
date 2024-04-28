@@ -107,6 +107,16 @@ public abstract class ConfigPart extends ConfigStringParsing {
         return value;
     }
 
+    protected List<Integer> getIntegerList(ConfigurationSection conf, String key, List<Integer> defaultVal) {
+        List<Integer> value;
+        try {
+            value = conf.getIntegerList(key);
+        } catch (Exception e) {
+            throw new ConfigParseException(String.format("Invalid key \"%s\" (String list). Please check your config. Defaulted to \"%s\"", key, defaultVal));
+        }
+        return value;
+    }
+
     protected List<String> getStringList(ConfigurationSection conf, String key, List<String> defaultVal) {
         List<String> value;
         try {
@@ -116,4 +126,9 @@ public abstract class ConfigPart extends ConfigStringParsing {
         }
         return value;
     }
+
+    // NOTE:
+    // as of now the default values DON'T DO ANYTHING
+    // as I prefeer for it to error out every time 
+    // Will be changed !
 }
